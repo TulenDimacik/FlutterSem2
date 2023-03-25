@@ -23,23 +23,14 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Users'),
-        actions: <Widget>[
-          CustomButton(
-            content: 'Добавить',
-              onPressed: () {
-                setState(() {
-                  showAddScreen();
-                });
-              },
-             
-      )],
       ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _usersStream,
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   return const Text('OSHIBKA');
                 }
@@ -66,8 +57,8 @@ class _MainScreenState extends State<MainScreen> {
                               IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    showUpdateScreen(
-                                        data['email'], data['login'], document.id);
+                                    showUpdateScreen(data['email'],
+                                        data['login'], document.id);
                                   });
                                 },
                                 icon: Icon(Icons.edit),
@@ -78,29 +69,28 @@ class _MainScreenState extends State<MainScreen> {
                                       data['email'] +
                                       " Логин: " +
                                       data['login'])),
-                            ]
-                            );
+                            ]);
                       })
                       .toList()
                       .cast(),
                 );
               },
-              
             ),
-            
           ),
           Row(
             children: [
               CustomButton(
-                content: 'Добавить',
+                  content: 'Добавить',
                   onPressed: () {
                     setState(() {
                       showAddScreen();
                     });
                   }),
-                  SizedBox(width: 20,),
-                  CustomButton(
-                content: 'Картинки',
+              SizedBox(
+                width: 20,
+              ),
+              CustomButton(
+                  content: 'Картинки',
                   onPressed: () {
                     Navigator.pushNamed(context, Photo.routeName);
                   }),
@@ -108,7 +98,6 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      
     );
   }
 

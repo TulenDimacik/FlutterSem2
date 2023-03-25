@@ -1,8 +1,9 @@
-# Практические 3 и 4 
+# Практические 3, 4 и 5 
 
 ## Работа с Firebase и FireStore
 
-<b>Цель:</b> Научиться работать с Firebase и Firestore, а также сделать различные способы авторизации при помощи FirebaseAuth, а также CRUD действия используя FireStore
+<b>Цель:</b> Научиться работать с Firebase и Firestore ,и FireStorage, а также сделать различные способы авторизации при помощи FirebaseAuth, а также CRUD действия используя FireStore
+
 Вначале подключаем необходимые зависимости в проект, после чего переходим на главный экран и верстаем страницы авторизации и регистрации. После чего в методе для регистрации прописываем следующий код
 
 ``` dart 
@@ -209,5 +210,67 @@ UserCredential userCredential = await auth.createUserWithEmailAndPassword(
   }
 
 ```
+Далее переходим к работе с FireStorage и хранению картинок
+Прописываем метод для добавления картинки в firestorage, а также записываем данные в новую коллекцию в firestore и создаем там метадату, которая будет хранить UID
+``` dart
+void FilePick() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      dialogTitle: 'Выбор файла',
+    );
 
-<b>Вывод:</b> в ходе практической работы удалось научиться работать с Firebase и Firestore, а также сделать различные способы авторизации при помощи FirebaseAuth, а также CRUD действия используя FireStore
+    if (result != null) {
+
+      Uint8List? file = result.files.single.bytes;
+      String name = getRandomString(5);
+      Reference ref = FirebaseStorage.instance.ref().child('${name}.png');
+      UploadTask uploadTask = ref.putData(file!,
+          SettableMetadata(customMetadata: {"User": auth.currentUser!.uid}));
+
+      final FirebaseFirestore fireStore = FirebaseFirestore.instance;
+
+      await fireStore
+          .collection('images')
+          .doc(name)
+          .set(
+            {
+              'size': size1,
+              'path': file.toString(),
+              'name': name,
+            },
+          )
+          .then((value) => ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("images info Added"))))
+          .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to add images info: $error"))));
+    } else {}
+  }
+
+```
+А также создаем метод для выгрузки данных, который затем будет вызываться в листе, для выгрузки данных
+
+``` dart
+Future<void> initImage() async {
+    fullpath.clear();
+    final stor = FirebaseStorage.instance.ref().list();
+    final list = await stor;
+    list.items.forEach((element) async {
+      final meta = await element.getMetadata();
+      final customValue = meta.customMetadata!['User'];
+      final url = await element.getDownloadURL();
+      size1 = meta.size;
+      if (customValue == auth.currentUser!.uid) {
+        
+        fullpath.add(ModelTest(url, element.name, size1));
+      }
+      setState(() {});
+    });
+  }
+```
+После чего проверяем работу программы
+
+<img src="./lib/assets/Screenshot_2.png" width=1000 height=400>
+<img src="./lib/assets/Screenshot_3.png" width=1000 height=400>
+<img src="./lib/assets/Screenshot_4.png" width=1000 height=400>
+
+<b>Вывод:</b> в ходе практической работы удалось научиться работать с Firebase, Firestore, Firestorage, а также сделать различные способы авторизации при помощи FirebaseAuth, а также CRUD действия используя FireStore и загрузку фото с помощью Firestorage.
